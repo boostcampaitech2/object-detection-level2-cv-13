@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/default_runtime.py', '../_base_/datasets/coco_detection.py'
+    '../configs/_base_/default_runtime.py', '../configs/_base_/datasets/coco_detection.py'
 ]
 
 # model settings
