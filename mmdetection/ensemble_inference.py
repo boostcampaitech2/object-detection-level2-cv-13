@@ -5,7 +5,7 @@ import os
 from ensemble_boxes import *
 import argparse
 import json
-
+from tqdm import tqdm
 
 def arg_parse():
     parser = argparse.ArgumentParser()
@@ -19,7 +19,7 @@ def extracting_info(csvs, img_size):
     score_info = []
     label_info = []
 
-    for csv in csvs:
+    for csv in tqdm(csvs):
         result = pd.read_csv(csv)
         
         box_info_per_csv = []
@@ -99,8 +99,13 @@ def main():
     sigma = cfgs['sigma']
     img_size = cfgs['img_size']
 
+    if weights == 'None':
+        weights = None
+
     num_models = len(csvs)
     num_imgs = 4871
+
+    print(csvs)
 
     box_info, score_info, label_info = extracting_info(csvs, img_size)
     
@@ -109,7 +114,7 @@ def main():
     result_label_info = []
     
     # print(len(box_info[0][2]))
-    for img_i in range(0, num_imgs):
+    for img_i in tqdm(range(0, num_imgs)):
         boxes_list = []
         scores_list = []
         labels_list = []
@@ -145,3 +150,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print("done")
