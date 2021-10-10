@@ -1,0 +1,10 @@
+{
+    "csvs" : ["./csv/output_1.csv", "./csv/output_2.csv"],
+    "save_path" : "./csv/result_outputs.csv",
+    "ensemble_mode" : "wbf",
+    "weights" : [2, 1],
+    "iou_thr" : 0.5,
+    "skip_box_thr" : 0.0001,
+    "sigma" : 0.1,
+    "img_size" : 1024
+}
