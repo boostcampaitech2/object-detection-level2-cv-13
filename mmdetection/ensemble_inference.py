@@ -67,6 +67,7 @@ def make_submmission(save_path, result_box_info, result_score_info, result_label
     for i, (box, score, label) in enumerate(zip(result_box_info, result_score_info, result_label_info)):
         file_names.append("test/" + str(i).zfill(4) + ".jpg")
         prediction = ''
+
         for b, s, l in zip(box, score, label):
             x_min = b[0]
             y_min = b[1]
@@ -74,7 +75,7 @@ def make_submmission(save_path, result_box_info, result_score_info, result_label
             y_max = b[3]
 
             prediction += str(int(l)) + ' ' + str(s) + ' ' + str(x_min) + ' ' + str(y_min) + ' ' + str(x_max) + ' ' + str(y_max) + ' '
-        # print(len(prediction))
+        
         prediction_strings.append(prediction)
 
 
@@ -103,17 +104,19 @@ def main():
         weights = None
 
     num_models = len(csvs)
-    num_imgs = 4871
-
     print(csvs)
 
     box_info, score_info, label_info = extracting_info(csvs, img_size)
     
+    if box_info:
+        num_imgs = len(box_info[0])
+    else:
+        num_imgs = 0
+
     result_box_info = []
     result_score_info = []
     result_label_info = []
-    
-    # print(len(box_info[0][2]))
+
     for img_i in tqdm(range(0, num_imgs)):
         boxes_list = []
         scores_list = []
@@ -124,8 +127,6 @@ def main():
             scores_list.append(score_info[model_i][img_i])
             labels_list.append(label_info[model_i][img_i])
 
-        # print(len(boxes_list[0]), len(boxes_list[1]))
-
         if mode == 'nms':
             boxes, scores, labels = nms(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr)
         elif mode == 'snms':
@@ -134,8 +135,6 @@ def main():
             boxes, scores, labels = non_maximum_weighted(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
         elif mode == 'wbf':
             boxes, scores, labels = weighted_boxes_fusion(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
-
-        # print("result : ", len(boxes), len(scores), len(labels))
 
         for b in boxes:
             for i in range(4):
