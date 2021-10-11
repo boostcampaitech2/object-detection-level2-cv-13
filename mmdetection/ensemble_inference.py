@@ -93,11 +93,8 @@ def main():
     csvs = cfgs['csvs']
     mode = cfgs['ensemble_mode']
     save_path = cfgs['save_path']
-
     weights = cfgs['weights']
     iou_thr = cfgs['iou_thr']
-    skip_box_thr = cfgs['skip_box_thr']
-    sigma = cfgs['sigma']
     img_size = cfgs['img_size']
 
     if weights == 'None':
@@ -130,10 +127,14 @@ def main():
         if mode == 'nms':
             boxes, scores, labels = nms(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr)
         elif mode == 'snms':
+            sigma = cfgs['sigma']
+            skip_box_thr = cfgs['skip_box_thr']
             boxes, scores, labels = soft_nms(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr, sigma=sigma, thresh=skip_box_thr)
         elif mode == 'nmw':
+            skip_box_thr = cfgs['skip_box_thr']
             boxes, scores, labels = non_maximum_weighted(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
         elif mode == 'wbf':
+            skip_box_thr = cfgs['skip_box_thr']
             boxes, scores, labels = weighted_boxes_fusion(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
 
         for b in boxes:
