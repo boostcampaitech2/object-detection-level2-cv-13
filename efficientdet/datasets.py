@@ -69,10 +69,29 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, index: int):
         
-        if self.mode == "validation" or random.random() > 0.5 or not self.cutmix:
+        random_number = random.random()
+        if self.mode == "validation":
             image, boxes, labels, image_id = self.load_image_boxes_labels(index)
-        else:
-            image, boxes, labels, image_id = self.load_cutmix(index)
+        elif self.mode == "train":
+            if self.cutmix == False and self.mixup == False:
+                image, boxes, labels, image_id = self.load_image_boxes_labels(index)
+            elif self.cutmix == True and self.mixup == False:
+                if random_number > 0.5:
+                    image, boxes, labels, image_id = self.load_image_boxes_labels(index)
+                else:
+                    image, boxes, labels, image_id = self.load_cutmix(index)
+            elif self.cutmix == False and self.mixup == True:
+                if random_number > 0.5:
+                    image, boxes, labels, image_id = self.load_image_boxes_labels(index)
+                else:
+                    image, boxes, labels, image_id = self.load_mixup(index)
+            elif self.cutmix == True and self.mixup == True:
+                if random_number > 0.5:
+                    image, boxes, labels, image_id = self.load_image_boxes_labels(index)
+                elif random_number > 0.25:
+                    image, boxes, labels, image_id = self.load_cutmix(index)
+                else:
+                    image, boxes, labels, image_id = self.load_mixup(index)
 
         target = {'boxes': boxes, 'labels': labels, 'image_id': torch.tensor([self.img_idx[index]])}
 
@@ -171,6 +190,24 @@ class TrainDataset(Dataset):
 
         return result_image, result_boxes, result_labels, image_id
 
+
+    def load_mixup(self, index):
+
+        image_id = self.coco.getImgIds(imgIds=self.img_idx[index])
+        indexes = [index, random.randint(0, len(self.img_idx) - 1)]
+
+        image1, boxes1, labels1, _ = self.load_image_boxes_labels(indexes[0])
+        image2, boxes2, labels2, _ = self.load_image_boxes_labels(indexes[1])
+
+        result_image = (image1 + image2) / 2
+        result_labels = [labels1, labels2]
+        result_boxes = [boxes1, boxes2]
+
+        result_labels = np.concatenate(result_labels, 0)
+        result_boxes = np.concatenate(result_boxes, 0)
+
+        return result_image, result_boxes, result_labels, image_id
+        
 
     def _area_func(self, x):
 
