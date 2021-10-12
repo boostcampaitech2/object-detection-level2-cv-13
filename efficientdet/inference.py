@@ -67,7 +67,6 @@ def main():
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model = efficientdet()
-    model, name = model['model'], model['name']
     model.load_state_dict(torch.load("./checkpoints/efficientdet_d4/62_0.5087735464134144.pth"))
     model = DetBenchPredict(model)
     model.to(device)
