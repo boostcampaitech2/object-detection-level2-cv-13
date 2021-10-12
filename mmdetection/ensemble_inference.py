@@ -46,7 +46,11 @@ def extracting_info(csvs, img_size):
                 elif i % 6 == 1:
                     score_info_per_img.append(float(pred))
                 else:
-                    tmp_box.append(float(pred) / img_size)
+                    if float(pred) / img_size > 1:
+                        tmp_box.append(1.0)
+                    else:
+                        tmp_box.append(float(pred) / img_size)
+
                     if len(tmp_box) == 4:
                         box_info_per_img.append(tmp_box)
                         tmp_box = []
