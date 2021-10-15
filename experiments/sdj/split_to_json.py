@@ -1,3 +1,4 @@
+from rm_outlier import *
 from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 from collections import Counter, defaultdict
 from pycocotools.coco import COCO
@@ -10,30 +11,7 @@ import os
 
 # 실행방법 python split_to_json.py
 
-#df_annotations.to_dict()
-def df_to_formatted_json(df, sep="."):
-    """
-    The opposite of json_normalize, make pandas dataframe into json 
-    pandas dataframe을 json 파일로 만들어 주는 함수입니다. keys는 한 개
-    """
-    result = []
-    for idx, row in df.iterrows():
-        parsed_row = {}
-        for col_label,v in row.items():
-            keys = col_label.split(".")
-
-            current = parsed_row
-            for i, k in enumerate(keys):
-                if i==len(keys)-1:
-                    current[k] = v
-                else:
-                    if k not in current.keys():
-                        current[k] = {}
-                    current = current[k]
-        # save
-        result.append(parsed_row)
-    return result
-
+#df_annotations.to_dict(
 
 
 if __name__=="__main__":
@@ -47,13 +25,18 @@ if __name__=="__main__":
                         help='fold split seed',default=42)
     parser.add_argument('--json_save_folder', type = str, 
                         help='folder_directory to save new json file',default='/opt/ml/detection/dataset/trn_val_split_json')
+    parser.add_argument('--check_outlier',type =bool,  default = False, help = "check whether remove outlier or not")
+    parser.add_argument('--rm_bbox',type =int,  default = 40, 
+        help = "the number of annotations that a image is defined as outlier")
+    parser.add_argument('--rm_wh', type = list, default = [10,10],
+        help = "Width and Height of annotations to be defined as outlier")
     args = parser.parse_args() 
 
     
     # train(원본 4,883) 파일을 json과 coco type으로 불러오기
-    with open("../dataset/train.json") as f:
+    with open("/opt/ml/detection/dataset/train.json") as f:
         train = json.load(f)
-    coco = COCO('../dataset/train.json') 
+    coco = COCO('/opt/ml/detection/dataset/train.json') 
 
 
     # image category와 넓이에 맞게 split 하는 부분
@@ -113,6 +96,9 @@ if __name__=="__main__":
         except OSError: 
             print("Error: Failed to create the directory.")
 
+        if args.check_outlier:
+            trn_json = rm_outlier(trn_json, args.rm_bbox, args.rm_wh)
+        #    val_json = rm_outlier(val_json, args.rm_bbox, args.rm_wh)
 
         with open(args.json_save_folder + f'/train_split_{fold}.json', 'w') as fp:
             json.dump(trn_json, fp)

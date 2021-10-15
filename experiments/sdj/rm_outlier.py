@@ -30,7 +30,7 @@ def df_to_formatted_json(df, sep="."):
         result.append(parsed_row)
     return result
 
-def rm_outlier(json_file=target_json, bbox_num = 40, wh = [10,10]):
+def rm_outlier(target_json, bbox_num = 40, wh = [10,10]):
 #         with open(args.json_file) as f:
 #         train = json.load(f)
     
@@ -74,7 +74,6 @@ def rm_outlier(json_file=target_json, bbox_num = 40, wh = [10,10]):
     df_images_rm = df_images_rm[origin_img_columns]
 
     print(f"이상치 제거 파일의 image 수: {train_df_rm['image_id'].nunique():,}, annotation 수: {len(train_df_rm):,}")
-    print("/".join(args.json_file.split("/")[:-1]) +"/rm_" + args.json_file.split("/")[-1] + "에 저장됩니다.")
 
     target_json['images'] = df_to_formatted_json(df_images_rm)
     target_json['annotations'] = df_to_formatted_json(df_annotation_rm)
