@@ -259,5 +259,4 @@ log_config = dict(
     ])
 
 
-#load_from = "/opt/ml/detection/object-detection-level2-cv-13/mmdetection/deformable_detr_r50_16x2_50e_coco_20210419_220030-a12b9512.pth"
-load_from = "/opt/ml/detection/object-detection-level2-cv-13/mmdetection/work_dirs/deform_deter_color+loss+rotate+distort2/best_bbox_mAP_50_epoch_3.pth"
+load_from = "https://download.openmmlab.com/mmdetection/v2.0/deformable_detr/deformable_detr_r50_16x2_50e_coco/deformable_detr_r50_16x2_50e_coco_20210419_220030-a12b9512.pth"
