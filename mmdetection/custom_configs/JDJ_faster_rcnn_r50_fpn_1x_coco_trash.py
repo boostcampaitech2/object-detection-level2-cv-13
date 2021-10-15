@@ -1,6 +1,6 @@
 _base_ = '../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
 
-work_dir = './work_dirs/faster_rcnn_r50_fpn_1x'
+work_dir = './work_dirs/faster_rcnn_r50_fpn_1x_512'
 
 ########################################################################
 seed = 2021
@@ -19,14 +19,14 @@ log_config = dict(
             type='WandbLoggerHook',
             init_kwargs=dict(
                 project='JDJ_exp',
-                name='jdj',
+                name='faster_rcnn_r50_fpn_1x_512',
                 entity='cval'
             )
         )
     ])
 
 # epoch 설정
-runner = dict(type='EpochBasedRunner', max_epochs=5)
+runner = dict(type='EpochBasedRunner', max_epochs=50)
 
 # validation metric 설정
 evaluation = dict(
@@ -99,8 +99,8 @@ data = dict(
         ann_file = root + 'test.json',
         pipeline = test_pipeline,
     ),
-    samples_per_gpu=32,
-    workers_per_gpu=8,
+    samples_per_gpu=64,
+    workers_per_gpu=4,
 )
 
 optimizer_config = dict(
