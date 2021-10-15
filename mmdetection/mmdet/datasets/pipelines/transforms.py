@@ -2269,8 +2269,8 @@ class MixUp:
         Returns:
             dict: Result dict with mixup transformed.
         """
-
-        results = self._mixup_transform(results)
+        if random.random() < self.p:    
+            results = self._mixup_transform(results)
         return results
 
     def get_indexes(self, dataset):
