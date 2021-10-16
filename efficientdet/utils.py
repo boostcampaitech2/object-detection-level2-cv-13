@@ -1,4 +1,6 @@
 import torch
+import argparse
+import json
 
 
 class Averager:
@@ -40,3 +42,15 @@ def get_loss(model, images, targets, device):
     loss, _, _ = model(images, targets).values()
 
     return loss
+
+
+def arg_parse():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cfg', type=str)
+    args = parser.parse_args()
+
+    with open(args.cfg, 'r') as f:
+        cfgs = json.load(f)
+
+    return cfgs
