@@ -7,6 +7,7 @@ import torch
 from models import efficientdet
 from effdet import unwrap_bench, DetBenchPredict
 from transforms import collate_fn, get_test_transform
+from utils import arg_parse
 
 
 def inference_fn(test_data_loader, model, device):
@@ -51,23 +52,30 @@ def make_submission(outputs, annotation, submission_path, score_threshold):
 
 
 def main():
-    annotation = '../dataset/test.json'
-    data_dir = '../dataset'
+
+    cfgs = arg_parse()
+
+    annotation = cfgs['test_annotation']
+    data_dir = cfgs['data_dir']
+    val_dl_cfgs = cfgs['val_dataloader']
+    best_model_dir = cfgs['best_model']
+    submission_dir = cfgs['submission']
+
     test_transforms = get_test_transform()
     test_dataset = TestDataset(annotation, data_dir, test_transforms)
     score_threshold = 0.05
 
     val_data_loader = DataLoader(
         test_dataset,
-        batch_size=2,
-        shuffle=False,
-        num_workers=4,
+        batch_size = val_dl_cfgs['batch_size'],
+        shuffle = val_dl_cfgs['shuffle'],
+        num_workers = val_dl_cfgs['num_workers'],
         collate_fn=collate_fn
     )
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model = efficientdet()
-    model.load_state_dict(torch.load("./checkpoints/efficientdet_d4/62_0.5087735464134144.pth"))
+    model.load_state_dict(torch.load(best_model_dir))
     model = DetBenchPredict(model)
     model.to(device)
 
@@ -90,5 +98,5 @@ def main():
     submission = pd.DataFrame()
     submission['PredictionString'] = prediction_strings
     submission['image_id'] = file_names
-    submission.to_csv('./submissions/submission_effdet_d4.csv', index=None)
+    submission.to_csv(submission_dir, index=None)
 
