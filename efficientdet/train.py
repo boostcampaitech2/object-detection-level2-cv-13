@@ -1,14 +1,13 @@
 from map_boxes import mean_average_precision_for_boxes
 from models import efficientdet
 from effdet import unwrap_bench, DetBenchTrain, DetBenchPredict
-from utils import Averager, collate_data, get_loss
+from utils import Averager, collate_data, get_loss, arg_parse
 from tqdm import tqdm
 import torch
 import os
 from datasets import TrainDataset
 from transforms import get_train_transform, collate_fn, get_valid_transform
 from torch.utils.data import DataLoader
-
 
 
 def train_fn(model, train_dataloader, optimizer, device, clip = None):
@@ -73,53 +72,67 @@ def eval_fn(model, val_dataloader, device, threshold = 0.05):
 
 
 def main():
-    annotation = '../dataset/train.json' # annotation 경로
-    data_dir = '../dataset' # data_dir 경로
+    cfgs = arg_parse()
+    
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    checkpoint = "./checkpoints/efficientdet_d4_cutmix_trans/{}_{}.pth"
+    annotation = cfgs['train_annotation']
+    data_dir = cfgs['data_dir']
+    checkpoint = cfgs['checkpoint']
+    train_ds_cfgs = cfgs['train_dataset']
+    val_ds_cfgs = cfgs['val_dataset']
+    train_dl_cfgs = cfgs['train_dataloader']
+    val_dl_cfgs = cfgs['val_dataloader']
+    opt_cfgs = cfgs['optimizer']
+    num_epochs = cfgs['epochs']
+
     train_transforms = get_train_transform()
     val_transforms = get_valid_transform()
 
-    train_dataset = TrainDataset(annotation, data_dir, "train",
-                                 cutmix = True,
-                                 fold = 0, k = 5, random_state = 923, 
+    train_dataset = TrainDataset(annotation, data_dir,
+                                 train_ds_cfgs['mode'],
+                                 train_ds_cfgs['cutmix'],
+                                 train_ds_cfgs['mixup'],
+                                 train_ds_cfgs['fold'],
+                                 train_ds_cfgs['k'],
+                                 train_ds_cfgs['random_state'], 
                                  transforms = train_transforms)
 
-    val_dataset = TrainDataset(annotation, data_dir, "validation",
-                               cutmix = False,
-                               fold = 0, k = 5, random_state = 923, 
+    val_dataset = TrainDataset(annotation, data_dir,
+                               val_ds_cfgs['mode'],
+                               val_ds_cfgs['cutmix'],
+                               val_ds_cfgs['mixup'],
+                               val_ds_cfgs['fold'],
+                               val_ds_cfgs['k'],
+                               val_ds_cfgs['random_state'], 
                                transforms = val_transforms)
 
     train_dataloader = DataLoader(
             train_dataset,
-            batch_size=4,
-            shuffle=True,
-            num_workers=2,
-            collate_fn=collate_fn
-        )
+            batch_size = train_dl_cfgs['batch_size'],
+            shuffle = train_dl_cfgs['shuffle'],
+            num_workers = train_dl_cfgs['num_workers'],
+            collate_fn = collate_fn)
 
     val_dataloader = DataLoader(
             val_dataset,
-            batch_size=2,
-            shuffle=True,
-            num_workers=2,
-            collate_fn=collate_fn
-        )
+            batch_size = val_dl_cfgs['batch_size'],
+            shuffle = val_dl_cfgs['shuffle'],
+            num_workers = val_dl_cfgs['num_workers'],
+            collate_fn = collate_fn)
     
-    model = efficientdet("./checkpoints/efficientdet_d4/62_0.5087735464134144.pth")
+    model = efficientdet()
     model.to(device)
     params = [p for p in model.parameters() if p.requires_grad]
 
-    optimizer = torch.optim.AdamW(params, lr=0.0002)
+    optimizer = torch.optim.AdamW(params, lr = opt_cfgs['lr'])
+    
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
                                                            mode = 'max',
                                                            factor = 0.5,
                                                            patience = 3)
 
-    num_epochs = 100
-    #best_val_map = 0
+    best_val_map = 0
     for epoch in range(num_epochs):
-        print("!"*100)
         
         train_loss = train_fn(model, train_dataloader, optimizer, device)
         print(f"Epoch #{epoch} train_loss: {train_loss}")
@@ -128,12 +141,15 @@ def main():
         print(f"eval_map: {val_map}")
         
         scheduler.step(val_map)
-        #if val_map > best_val_map:
-        save_path = checkpoint.format(epoch, val_map)
-        save_dir = os.path.dirname(save_path)
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
+        if val_map > best_val_map:
+            save_path = checkpoint.format(epoch, val_map)
+            save_dir = os.path.dirname(save_path)
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
 
-        torch.save(model.state_dict(), save_path)
-        #best_val_map = val_map
+            torch.save(model.state_dict(), save_path)
+            best_val_map = val_map
 
+
+if __name__ == "__main__":
+    main()
