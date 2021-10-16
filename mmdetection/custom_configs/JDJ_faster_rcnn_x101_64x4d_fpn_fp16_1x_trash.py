@@ -1,6 +1,6 @@
 _base_ = '../configs/fp16/faster_rcnn_r50_fpn_fp16_1x_coco.py'
 
-work_dir = './work_dirs/JDJ_faster_rcnn_x101_64x4d_fpn_fp16_1x_trash_1'
+work_dir = './work_dirs/JDJ_faster_rcnn_x101_64x4d_fpn_fp16_1x_trash_4'
 # wandb 연결
 log_config = dict(
     interval=30,
@@ -10,7 +10,7 @@ log_config = dict(
             type='WandbLoggerHook',
             init_kwargs=dict(
                 project='JDJ_exp',
-                name='JDJ_faster_rcnn_x101_64x4d_fpn_fp16_1x_trash_1',
+                name='JDJ_faster_rcnn_x101_64x4d_fpn_fp16_1x_trash_4',
                 entity='cval'
             )
         )
@@ -105,13 +105,13 @@ data = dict(
     train=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'trn_val_split_json/train_split_1.json',
+        ann_file=data_root + 'trn_val_split_json/train_split_4.json',
         img_prefix=data_root,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         classes=classes,
-        ann_file=data_root + 'trn_val_split_json/valid_split_1.json',
+        ann_file=data_root + 'trn_val_split_json/valid_split_4.json',
         img_prefix=data_root,
         pipeline=test_pipeline),
     test=dict(
