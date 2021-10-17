@@ -15,6 +15,10 @@ def arg_parse():
     return args
 
 def extracting_info(csvs, img_size):
+    '''
+    csv 파일의 정보를 추출하여 ensemble_boxes의 입력 형태로 변환
+    (box, score, label)
+    '''
     box_info = []
     score_info = []
     label_info = []
@@ -30,6 +34,7 @@ def extracting_info(csvs, img_size):
             score_info_per_img = []
             label_info_per_img = []
 
+            # 모델이 박스를 예측하지 않은 경우
             if isinstance(prediction, float):
                 box_info_per_csv.append(box_info_per_img)
                 score_info_per_csv.append(score_info_per_img)
@@ -49,6 +54,7 @@ def extracting_info(csvs, img_size):
                     if float(pred) / img_size > 1:
                         tmp_box.append(1.0)
                     else:
+                        # 박스의 좌표를 이미지 에 대한 값으로 정규화 (0~1)
                         tmp_box.append(float(pred) / img_size)
 
                     if len(tmp_box) == 4:
@@ -66,6 +72,9 @@ def extracting_info(csvs, img_size):
     return box_info, score_info, label_info
 
 def make_submmission(save_path, result_box_info, result_score_info, result_label_info):
+    '''
+    최종 결과를 제출 양식에 맞게 csv 파일로 생성
+    '''
     prediction_strings = []
     file_names = []
     for i, (box, score, label) in enumerate(zip(result_box_info, result_score_info, result_label_info)):
@@ -128,6 +137,7 @@ def main():
             scores_list.append(score_info[model_i][img_i])
             labels_list.append(label_info[model_i][img_i])
 
+        # 앙상블 mode 선택
         if mode == 'nms':
             boxes, scores, labels = nms(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr)
         elif mode == 'snms':
@@ -141,6 +151,7 @@ def main():
             skip_box_thr = cfgs['skip_box_thr']
             boxes, scores, labels = weighted_boxes_fusion(boxes_list, scores_list, labels_list, weights=weights, iou_thr=iou_thr, skip_box_thr=skip_box_thr)
 
+        # 이미지 크기에 대한 값으로 정규화했던 값을 좌표값으로 변환 
         for b in boxes:
             for i in range(4):
                 b[i] = b[i]*img_size
