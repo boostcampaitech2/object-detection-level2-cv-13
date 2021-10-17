@@ -28,13 +28,13 @@ object-detection-level2-cv-13/
     - Train
       
         ```
-        python ./efficientdet/train.py
+        python ./efficientdet/train.py config.json
         ```
         
     - Inference
       
         ```
-        python ./efficientdet/inference.py
+        python ./efficientdet/inference.py config.json
         ```
     
 - MMdetection
