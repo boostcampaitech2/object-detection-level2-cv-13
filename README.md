@@ -26,39 +26,39 @@ object-detection-level2-cv-13/
 
 - Efficientdet
     - Train
-        
+      
         ```
         python ./efficientdet/train.py
         ```
         
     - Inference
-        
+      
         ```
         python ./efficientdet/inference.py
         ```
-        
+    
 - MMdetection
     - Train
-        
+      
         ```
         python ./mmdetction/tools/train.py [config 파일 경로]
         ```
         
     - Inference
-        
+      
         ```
-        python ./mmdetection/tools/SDJ_test.py --config [config 파일 경로] --checkpoint [checkpoint 파일 경로]
+        python ./mmdetection/tools/SDJ_test.py --config [config 파일 경로] --checkpoint [checkpoint 파일 경로] --sub_csv_name [생성된 submission.csv 파일 이름]
         ```
-        
+    
 - Yolov5
     - Train
-        
+      
         ```
         python ./yolov5/train.py --data [데이터 config yaml 파일 경로] --cfg [모델 config yaml 파일 경로] --batch-size [배치 사이즈]
         ```
         
     - Inference
-        
+      
         ```
         $ python ./yolov5/detect.py --source [inferenc 데이터 경로]
         ```
@@ -68,9 +68,9 @@ object-detection-level2-cv-13/
         ```
         
         - detect.py를 실행한 결과를 이용해 inference 결과를 얻고, submission.py를 통해 csv 형태 변환합니다.
-        
-- 앙상블
     
+- 앙상블
+  
     ```
     python ./mmdetection/ensemble_inference.py ensemble_inference_cfg.json
     ```
