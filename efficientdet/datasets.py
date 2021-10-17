@@ -12,7 +12,7 @@ import os
 
 class TrainDataset(Dataset):
 
-    def __init__(self, annotation, data_dir, mode, cutmix = True, fold = 0, k = 5, random_state = 923, transforms=None):
+    def __init__(self, annotation, data_dir, mode, cutmix = True, mixup = True, fold = 0, k = 5, random_state = 923, transforms=None):
         
         """ Trash Object Detection Train Dataset
         Args:
@@ -20,6 +20,7 @@ class TrainDataset(Dataset):
             data_dir : data_dir directory
             mode : "train" when you want to train, "validation" when you want to evaluate
             cutmix : True when you want to use cutmix(mosaic)
+            mixup : True when you want to use mixup
             fold : the order of fold to be learned
             k : how many folds going to devided
             random_state : random state of kfold
@@ -31,6 +32,7 @@ class TrainDataset(Dataset):
         self.coco = COCO(annotation)
         self.mode = mode
         self.cutmix = cutmix
+        self.mixup = mixup
         self.predictions = {
             "images": self.coco.dataset["images"].copy(),
             "categories": self.coco.dataset["categories"].copy(),
