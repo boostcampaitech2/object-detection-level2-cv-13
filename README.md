@@ -54,22 +54,13 @@ object-detection-level2-cv-13/
     - Train
         
         ```
-        python ./yolov5/train.py --data coco.yaml --cfg yolov5s.yaml --weights '' --batch-size 64
-                                                 yolov5m                                40
-                                                 yolov5l                                24
-                                                 yolov5x                                16
+        python ./yolov5/train.py --data [데이터 config yaml 파일 경로] --cfg [모델 config yaml 파일 경로] --batch-size [배치 사이즈]
         ```
         
     - Inference
         
         ```
-        $ python ./yolov5/detect.py --source 0  # webcam
-                                    file.jpg  # image 
-                                    file.mp4  # video
-                                    path/  # directory
-                                    path/*.jpg  # glob
-                                    'https://youtu.be/NUsoVlDFqZg'  # YouTube
-                                    'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP stream
+        $ python ./yolov5/detect.py --source [inferenc 데이터 경로]
         ```
         
         ```
@@ -77,6 +68,7 @@ object-detection-level2-cv-13/
         ```
         
         - detect.py를 실행한 결과를 이용해 inference 결과를 얻고, submission.py를 통해 csv 형태 변환합니다.
+        
 - 앙상블
     
     ```
