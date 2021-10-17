@@ -6,19 +6,15 @@ import warnings
 import cv2
 import mmcv
 import numpy as np
-from numpy import random
 
-# from mmdet.core import PolygonMasks
 from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
-# from ..builder import PIPELINES
 from mmdet.datasets import PIPELINES
 
 import random
 
 '''
 1. target이미지안에서 bounding box의 개수가 [1, 3]가 되게 해줌
-2. (target이미지 * 0.3 + original이미지 * 0.7) 로 변경 -> 취소
-3. prob 인자값 줌
+2. __init__에 prob 인자값 줌
 '''
 @PIPELINES.register_module()
 class NewMixUp:
@@ -123,12 +119,10 @@ class NewMixUp:
             '''
             try:
                 gt_bboxes_i = dataset.get_ann_info(index)['bboxes']
-                # if len(gt_bboxes_i) != 0:
                 if 0 < len(gt_bboxes_i) and len(gt_bboxes_i) <= 3:
                     break
             except IndexError:
                 print('Error!!!!!!!!!!!!! index:', index)
-        # print(f'index: {index}')
         return index
 
 
@@ -146,20 +140,6 @@ class NewMixUp:
         assert len(
             results['mix_results']) == 1, 'MixUp only support 2 images now !'
 
-        # print('result: ', results)
-        '''
-        result
-        {
-            'img_info':{},
-            'ann_info':{},
-            ...,
-            'mix_results':[{
-                'img_info':{},
-                'ann_info':{},
-                ...
-            }]
-        }
-        '''
         if random.random() < self.prob:
             return results
 
@@ -246,9 +226,7 @@ class NewMixUp:
             ori_img = ori_img.astype(np.float32)
             mixup_img = 0.5 * ori_img + 0.5 * padded_cropped_img.astype(
                 np.float32)
-            # mixup_img = 0.7 * ori_img + 0.3 * padded_cropped_img.astype(
-            #     np.float32)
-
+        
             retrieve_gt_labels = retrieve_results['gt_labels'][keep_list]
             retrieve_gt_bboxes = cp_retrieve_gt_bboxes[keep_list]
             mixup_gt_bboxes = np.concatenate(

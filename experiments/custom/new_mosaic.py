@@ -6,17 +6,14 @@ import warnings
 import cv2
 import mmcv
 import numpy as np
-from numpy import random
 
-# from mmdet.core import PolygonMasks
 from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
-# from ..builder import PIPELINES
 from mmdet.datasets import PIPELINES
 
 import random
 
 '''
-1. prob 인자값 줌
+1. __init__에 prob 인자값 줌
 '''
 @PIPELINES.register_module()
 class NewMosaic:

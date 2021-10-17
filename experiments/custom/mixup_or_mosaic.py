@@ -1,59 +1,3 @@
-# import copy
-# import inspect
-# import math
-# import warnings
-
-# import cv2
-# import mmcv
-# import numpy as np
-# from numpy import random
-
-# # from mmdet.core import PolygonMasks
-# from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
-# # from ..builder import PIPELINES
-# from mmdet.datasets import PIPELINES
-
-# import random
-
-
-# @PIPELINES.register_module()
-# class MixUpOrMosaic:
-#     def __init__(self,
-#                  img_scale=(640, 640),
-#                  center_ratio_range=(0.5, 1.5),
-#                  ratio_range=(0.5, 1.5),
-#                  flip_ratio=0.5,
-#                  pad_val=114,
-#                  max_iters=15,
-#                  min_bbox_size=5,
-#                  min_area_ratio=0.2,
-#                  max_aspect_ratio=20,
-#                  prob=0.8): # 0.5*prob : Mosaic / 0.5*(1-prob) : MixUp / 50% : None
-#         assert isinstance(img_scale, tuple)
-#         assert 0 <= prob <= 1
-
-#         self.dynamic_scale = img_scale
-#         self.center_ratio_range = center_ratio_range
-#         self.ratio_range = ratio_range
-#         self.flip_ratio = flip_ratio
-#         self.pad_val = pad_val
-#         self.max_iters = max_iters
-#         self.min_bbox_size = min_bbox_size
-#         self.min_area_ratio = min_area_ratio
-#         self.max_aspect_ratio = max_aspect_ratio
-#         self.prob = prob
-
-#     def __call__(self, results):
-#         random_val = random.random()
-#         if random_val > 0.5:
-#             pass    
-#         elif random_val < 0.5 * (1 - self.prob):
-#             results = self._mixup_transform(resultss)
-#         else:
-#             results = self._mosaic_transform(results)
-#         return results
-
-    
 import copy
 import inspect
 import math
@@ -62,17 +6,14 @@ import warnings
 import cv2
 import mmcv
 import numpy as np
-from numpy import random
 
-# from mmdet.core import PolygonMasks
 from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
-# from ..builder import PIPELINES
 from mmdet.datasets import PIPELINES
 
 import random
 
 '''
-1. prob 인자값 줌
+1. __init에 prob 인자값 줌
 2. MixUp/Mosaic/None 모드는 get_indexes에서 결정
 3. 모드 확인은 
    results['mix_results'] == 0 : None
@@ -129,8 +70,7 @@ class MixUpOrMosaic:
             list or int or None: index.
         """
         random_val = random.random()
-        # print('random_val:', random_val)
-
+        
         index = None
         # 0.5*prob: Mosaic / 0.5*(1-prob): MixUp / 0.5: None
         if random_val > 0.5 :
@@ -138,19 +78,11 @@ class MixUpOrMosaic:
         elif random_val < 0.5*(1-self.prob):
             for i in range(self.max_iters):
                 index = random.randint(0, len(dataset)-1)
-                '''
                 gt_bboxes_i = dataset.get_ann_info(index)['bboxes']
-                # if len(gt_bboxes_i) != 0:
-                if 0 < len(gt_bboxes_i) and len(gt_bboxes_i) <= 3:
-                    break
-                '''
-                gt_bboxes_i = dataset.get_ann_info(index)['bboxes']
-                # if len(gt_bboxes_i) != 0:
                 if 0 < len(gt_bboxes_i) and len(gt_bboxes_i) <= 3:
                     break
         else:
             index = [random.randint(0, len(dataset) - 1) for _ in range(3)]
-        # print('index:', index)
         return index
 
     def _mixup_or_mosaic_transform(self, results):
@@ -161,7 +93,6 @@ class MixUpOrMosaic:
         '''
         assert 'mix_results' in results
         mode_int = len(results['mix_results'])
-        # print('mode_int: ', mode_int)
         assert mode_int in [0, 1, 3]
 
         if mode_int == 0:
@@ -182,10 +113,7 @@ class MixUpOrMosaic:
         """
 
         assert 'mix_results' in results
-        # if random.random() < self.prob:
-        #     return results
-        # print(results['mix_results'][0])
-
+        
         mosaic_labels = []
         mosaic_bboxes = []
         if len(results['img'].shape) == 3:
@@ -337,23 +265,6 @@ class MixUpOrMosaic:
         assert len(
             results['mix_results']) == 1, 'MixUp only support 2 images now !'
 
-        # print('result: ', results)
-        '''
-        result
-        {
-            'img_info':{},
-            'ann_info':{},
-            ...,
-            'mix_results':[{
-                'img_info':{},
-                'ann_info':{},
-                ...
-            }]
-        }
-        '''
-        # if random.random() < self.prob:
-        #     return results
-
         if results['mix_results'][0]['gt_bboxes'].shape[0] == 0:
             # 0.5의 확률로 적용
             # empty bbox
@@ -437,9 +348,7 @@ class MixUpOrMosaic:
             ori_img = ori_img.astype(np.float32)
             mixup_img = 0.5 * ori_img + 0.5 * padded_cropped_img.astype(
                 np.float32)
-            # mixup_img = 0.7 * ori_img + 0.3 * padded_cropped_img.astype(
-            #     np.float32)
-
+        
             retrieve_gt_labels = retrieve_results['gt_labels'][keep_list]
             retrieve_gt_bboxes = cp_retrieve_gt_bboxes[keep_list]
             mixup_gt_bboxes = np.concatenate(
